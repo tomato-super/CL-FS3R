@@ -1,0 +1,407 @@
+// Modified by Waldo derivative maintainers on 2026-04-23.
+syntax = "proto3";
+
+option java_package = "ex.grpc";
+
+package dbquery;
+
+// Defines the service
+service Query {
+    // Function invoked to send the request
+    rpc SendDCFInit (InitDCFRequest) returns (InitDCFResponse) {}
+    rpc SendDPFInit (InitDPFRequest) returns (InitDPFResponse) {}
+    rpc SendATInit (InitATRequest) returns (InitATResponse) {}
+    rpc SendListInit (InitListRequest) returns (InitListResponse) {}
+    rpc SendDCFUpdate (UpdateDCFRequest) returns (UpdateDCFResponse) {}
+    rpc SendDCFBatchedUpdate (BatchedUpdateDCFRequest) returns (BatchedUpdateDCFResponse) {}
+    rpc SendDPFUpdate (UpdateDPFRequest) returns (UpdateDPFResponse) {}
+    rpc SendDPFBatchedUpdate (BatchedUpdateDPFRequest) returns (BatchedUpdateDPFResponse) {}
+    rpc SendListUpdate (UpdateListRequest) returns (UpdateListResponse) {}
+    rpc SendListBatchedUpdate (BatchedUpdateListRequest) returns (BatchedUpdateListResponse) {}
+    rpc SendATAppend1 (AppendAT1Request) returns (AppendAT1Response) {}
+    rpc SendATAppend2 (AppendAT2Request) returns (AppendAT2Response) {}
+    rpc SendDCFQuery (QueryDCFRequest) returns (QueryDCFResponse) {}
+    rpc SendATQuery (QueryATRequest) returns (QueryATResponse) {}
+    rpc SendAggQuery (QueryAggRequest) returns (QueryAggResponse) {}
+
+    rpc SendVBAggQuery (QueryVBAggRequest) returns (QueryVBAggResponse) {}
+    rpc SendOneHotTableUpdate (UpdateOneHotTableRequest) returns (UpdateOneHotTableResponse) {}
+    rpc SendOneHotTableBatchUpdate (UpdateOneHotTableBatchRequest) returns (UpdateOneHotTableBatchResponse) {}
+    rpc SendOneHotTableInit (InitOneHotTableRequest) returns (InitOneHotTableResponse) {}
+    rpc SendBOTableInit (InitBOTableRequest) returns (InitBOTableResponse) {}
+    rpc SendBOTableUpdate (UpdateBOTableRequest) returns (UpdateBOTableResponse) {}
+    rpc SendBOTableBatchUpdate (UpdateBOTableBatchRequest) returns (UpdateBOTableBatchResponse) {}
+    rpc SendBOAggQuery (QueryBOAggRequest) returns (QueryBOAggResponse) {}
+    rpc SendVBFSSAggQuery (QueryVBFSSAggRequest) returns (QueryVBFSSAggResponse) {}
+    rpc SendBOFSSAggQuery (QueryBOFSSAggRequest) returns (QueryBOFSSAggResponse) {}
+}
+
+service Aggregate {
+    rpc SendMult (MultRequest) returns (MultResponse) {}
+    rpc SendSystemInit (InitSystemRequest) returns (InitSystemResponse) {}
+}
+
+message InitSystemRequest {
+    bytes key = 1;
+}
+
+message InitSystemResponse {
+    bytes result = 1;
+}
+
+message InitDCFRequest {
+    bytes id = 1;
+    uint32 window_size = 2;
+    uint32 num_buckets = 3;
+    bool malicious = 4;
+}
+
+message InitDCFResponse {
+    bytes result = 1;
+}
+
+message InitDPFRequest {
+    bytes id = 1;
+    uint32 window_size = 2;
+    uint32 num_buckets = 3;
+    bool malicious = 4;
+}
+
+message InitDPFResponse {
+    bytes result = 1;
+}
+
+message InitListRequest {
+    bytes id = 1;
+    uint32 window_size = 2;
+}
+
+message InitListResponse {
+    bytes result = 1;
+}
+
+message InitATRequest {
+    bytes id = 1;
+    uint32 agg_func = 2;
+    uint32 depth = 3;
+}
+
+message InitATResponse {
+    bytes result = 1;
+}
+
+message UpdateDCFRequest {
+    bytes id = 1;
+    uint32 val = 2;
+    bytes data0 = 3;
+    bytes data1 = 4;
+}
+
+message BatchedUpdateDCFRequest {
+    repeated UpdateDCFRequest updates = 1;
+}
+
+message UpdateDCFResponse {
+    bytes result = 1;
+}
+
+message BatchedUpdateDCFResponse {
+    bytes result = 1;
+}
+
+message UpdateDPFRequest {
+    bytes id = 1;
+    uint32 val = 2;
+    bytes data0 = 3;
+    bytes data1 = 4;
+}
+
+message BatchedUpdateDPFRequest {
+    repeated UpdateDPFRequest updates = 1;
+}
+
+message UpdateDPFResponse {
+    bytes result = 1;
+}
+
+message BatchedUpdateDPFResponse {
+    bytes result = 1;
+}
+
+message UpdateListRequest {
+    bytes id = 1;
+    uint32 val = 2;
+    bytes share0 = 3;
+    bytes share1 = 4;
+}
+
+message BatchedUpdateListRequest {
+    repeated UpdateListRequest updates = 1;
+}
+
+message UpdateListResponse {
+    bytes result = 1;
+}
+
+message BatchedUpdateListResponse {
+    bytes result = 1;
+}
+
+message AppendAT1Request {
+    bytes id = 1;
+    uint64 idx = 2;
+}
+
+message AppendAT1Response {
+    repeated bytes parent_shares0 = 1;
+    repeated bytes parent_shares1 = 2;
+}
+
+message AppendAT2Request {
+    bytes id = 1;
+    uint64 idx = 2;
+    repeated bytes new_shares0 = 3;
+    repeated bytes new_shares1 = 4;
+}
+
+message AppendAT2Response {
+    bytes result = 1;
+}
+
+message QueryDCFRequest {
+    bytes id = 1;
+    bytes key0 = 2;
+    bytes key1 = 3;
+}
+
+message QueryDCFResponse {
+    bytes res = 1;    // uint8_t
+}
+
+message QueryDPFRequest {
+    bytes key0 = 1;
+    bytes key1 = 2;
+}
+
+message QueryDPFResponse {
+    bytes res = 1;    // uint8_t
+}
+
+message QueryATRequest {
+    string id = 1;
+    bytes key0 = 2;
+    bytes key1 = 3;
+}
+
+message QueryATResponse {
+    bytes res = 1;
+    bytes mac = 2;
+    bytes res_r = 3;
+    bytes mac_r = 4;
+}
+
+message BaseFilter {
+    string id = 1;
+    bytes key0 = 2;
+    bytes key1 = 3;
+    bool is_point = 4;   // otherwise is range filter
+}
+
+message CombinedFilter {
+    repeated BaseFilter base_filters = 1;
+    bool op_is_and = 2;     // otherwise is OR operator
+}
+
+message QueryAggRequest {
+    string agg_id = 1;
+    CombinedFilter combined_filter = 2; 
+}
+
+message QueryAggResponse {
+    bytes res = 1;  // uint128_t
+    bytes mac = 2;
+    bytes lin_comb = 3;
+    bytes lin_comb_mac = 4;
+}
+
+message MultRequest {
+    bytes shares = 1;
+}
+
+message MultResponse {
+    bytes res = 1;
+}
+
+
+message BaseVBFilter {
+    string id = 1;
+    bytes share_0 = 2;
+    bytes share_1 = 3;
+    bool is_point = 4;
+}
+
+message CombinedVBFilter {
+    repeated BaseVBFilter base_vbfilters = 1;
+    bool is_and = 2;
+}
+
+message QueryVBAggRequest {
+    string agg_id = 1;
+    CombinedVBFilter combined_vbfilter = 2;
+}
+
+message QueryVBAggResponse {
+    bytes res = 1;
+}
+
+message VDPFLocalKey {
+    uint32 share_index = 1;
+    bytes key = 2;
+}
+
+enum VBFSSLeafType {
+    VBFSS_LEAF_VDPF = 0;
+    VBFSS_LEAF_VDCF = 1;
+}
+
+message BaseVBFSSFilter {
+    string id = 1;
+    uint32 domain_size = 2;
+    uint32 vec_dim = 3;
+    bytes key0 = 4;
+    bytes key1 = 5;
+    uint32 predicate_index = 6;
+    VBFSSLeafType leaf_type = 7;
+}
+
+message CombinedVBFSSFilter {
+    repeated BaseVBFSSFilter base_vbfssfilters = 1;
+    bool is_and = 2;
+}
+
+message QueryVBFSSAggRequest {
+    string agg_id = 1;
+    CombinedVBFSSFilter combined_vbfssfilter = 2;
+}
+
+message QueryVBFSSAggResponse {
+    bytes res = 1;
+}
+
+message BaseBOFilter {
+    string id = 1;
+    bytes block_share_0 = 2;
+    bytes block_share_1 = 3;
+    bytes offset_share_0 = 4;
+    bytes offset_share_1 = 5;
+    uint32 predicate_index = 6;
+}
+
+message CombinedBOFilter {
+    repeated BaseBOFilter base_bofilters = 1;
+    bool is_and = 2;
+}
+
+message QueryBOAggRequest {
+    string agg_id = 1;
+    CombinedBOFilter combined_bofilter = 2;
+}
+
+message QueryBOAggResponse {
+    bytes res = 1;
+}
+
+enum BOFSSDomainType {
+    BOFSS_DOMAIN_BLOCK = 0;
+    BOFSS_DOMAIN_OFFSET = 1;
+}
+
+enum BOFSSPrimitiveType {
+    BOFSS_PRIMITIVE_VDPF = 0;
+    BOFSS_PRIMITIVE_VDCF = 1;
+}
+
+message BaseBOFSSFilter {
+    string id = 1;
+    uint32 predicate_index = 2;
+    uint32 domain_size = 3;
+    BOFSSDomainType domain_type = 4;
+    bytes key0 = 5;
+    bytes key1 = 6;
+    BOFSSPrimitiveType primitive_type = 7;
+}
+
+message CombinedBOFSSFilter {
+    repeated BaseBOFSSFilter base_bofssfilters = 1;
+    bool is_and = 2;
+}
+
+message QueryBOFSSAggRequest {
+    string agg_id = 1;
+    CombinedBOFSSFilter combined_bofssfilter = 2;
+}
+
+message QueryBOFSSAggResponse {
+    bytes res = 1;
+}
+
+message UpdateOneHotTableRequest {
+    string table_id = 1;
+    uint32 rank_loc = 2;
+    bytes share_data_0 = 3;
+    bytes share_data_1 = 4;
+}
+
+message UpdateOneHotTableResponse {
+    bytes res = 1;
+}
+
+message UpdateOneHotTableBatchRequest {
+    repeated UpdateOneHotTableRequest update = 1;
+}
+
+message UpdateOneHotTableBatchResponse {
+    bytes res = 1;
+}
+
+message InitOneHotTableRequest {
+    string table_id = 1;
+    uint32 windowSize = 2;
+    uint32 numBuckets = 3;
+}
+
+message InitOneHotTableResponse {
+    bytes res = 1;
+}
+
+message InitBOTableRequest {
+    string table_id = 1;
+    uint32 windowSize = 2;
+    uint32 numBuckets = 3;
+    uint32 logBlockNum = 4;
+}
+
+message InitBOTableResponse {
+    bytes res = 1;
+}
+
+message UpdateBOTableRequest {
+    string table_id = 1;
+    uint32 rank_loc = 2;
+    bytes index_share_data_0 = 3;
+    bytes index_share_data_1 = 4;
+    bytes offset_share_data_0 = 5;
+    bytes offset_share_data_1 = 6;
+}
+
+message UpdateBOTableResponse {
+    bytes res = 1;
+}
+
+message UpdateBOTableBatchRequest {
+    repeated UpdateBOTableRequest update = 1;
+}
+
+message UpdateBOTableBatchResponse {
+    bytes res = 1;
+}

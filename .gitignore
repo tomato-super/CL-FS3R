@@ -1,0 +1,18 @@
+build/
+logs/
+result/
+devDoc/
+.idea/
+.vscode/
+.codex
+
+# CMake generated files
+**/CMakeFiles/
+**/CMakeCache.txt
+**/cmake_install.cmake
+**/Makefile
+**/compile_commands.json
+
+# Python cache
+**/__pycache__/
+*.pyc

@@ -1,0 +1,15 @@
+name: License Check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  license-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run license checks
+        run: ./scripts/check_licenses.sh
