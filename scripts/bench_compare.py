@@ -156,6 +156,13 @@ def theoretical_query_comm_bytes(mode, num_ands, log_window_sz, log_num_buckets,
     """
     window_size = 1 << log_window_sz
     num_buckets = 1 << log_num_buckets
+    # Current implementation emits 2 leaves per predicate for single-sided range
+    # in VBFSS / BO / BOFSS paths, while point uses 1 leaf per predicate.
+    leaves_per_pred = 2 if (
+        mode in VB_FSS_RANGE_MODES
+        or mode in BO_NON_FSS_RANGE_MODES
+        or mode in BO_FSS_RANGE_MODES
+    ) else 1
 
     if mode in ("point", "dcf"):
         # DPF key size (non-malicious):
@@ -175,29 +182,31 @@ def theoretical_query_comm_bytes(mode, num_ands, log_window_sz, log_num_buckets,
     elif mode in VB_FSS_POINT_MODES or mode in VB_FSS_RANGE_MODES:
         # vDPF upload follows DPF-like key transport with depth-derived key size.
         key_bytes = FIELD_BYTES * (log_num_buckets + 2)
-        c2s_tx = NUM_SERVERS * num_ands * (2 * key_bytes)
+        c2s_tx = NUM_SERVERS * num_ands * leaves_per_pred * (2 * key_bytes)
         s2c_tx = NUM_SERVERS * FIELD_BYTES
         per_server_s2s = FIELD_BYTES * window_size * (2 * num_ands - 1)
     elif mode in BO_NON_FSS_POINT_MODES or mode in BO_NON_FSS_RANGE_MODES:
         log_block_num = resolve_log_block_num(mode, log_num_buckets, log_block_num)
         block_num = 1 << log_block_num
         block_size = num_buckets // block_num
-        c2s_tx = NUM_SERVERS * num_ands * (2 * (block_num + block_size) * FIELD_BYTES)
+        c2s_tx = NUM_SERVERS * num_ands * leaves_per_pred * (2 * (block_num + block_size) * FIELD_BYTES)
         s2c_tx = NUM_SERVERS * FIELD_BYTES
-        # BO path:
-        #   RSSReshare for block + offset => 2 * num_ands * window_size
-        #   AND(block, offset) per predicate => num_ands * window_size
-        #   combine predicates => (num_ands - 1) * window_size
-        per_server_s2s = FIELD_BYTES * window_size * (4 * num_ands - 1)
+        # BO path with leaf expansion:
+        #   For each leaf: RSSReshare(block+offset)=2, leaf-AND=1  => 3 * leaves
+        #   Within-predicate OR over leaves: (leaves - 1)
+        #   Across-predicate combine: (num_ands - 1)
+        # Total mult-like rounds per server: 4 * num_ands * leaves_per_pred - 1
+        per_server_s2s = FIELD_BYTES * window_size * (4 * num_ands * leaves_per_pred - 1)
     elif mode in BO_FSS_POINT_MODES or mode in BO_FSS_RANGE_MODES:
         log_block_num = resolve_log_block_num(mode, log_num_buckets, log_block_num)
         # BO-FSS uploads two vDPF domains per predicate: block + offset.
         # Reuse existing DPF-like key size model used by this script.
         key_block_bytes = FIELD_BYTES * (log_block_num + 2)
         key_offset_bytes = FIELD_BYTES * ((log_num_buckets - log_block_num) + 2)
-        c2s_tx = NUM_SERVERS * num_ands * (2 * (key_block_bytes + key_offset_bytes))
+        c2s_tx = NUM_SERVERS * num_ands * leaves_per_pred * (2 * (key_block_bytes + key_offset_bytes))
         s2c_tx = NUM_SERVERS * FIELD_BYTES
-        per_server_s2s = FIELD_BYTES * window_size * (4 * num_ands - 1)
+        # Same server-side composition count as BO non-FSS under current implementation.
+        per_server_s2s = FIELD_BYTES * window_size * (4 * num_ands * leaves_per_pred - 1)
     else:
         return {
             "c2s_tx": None,

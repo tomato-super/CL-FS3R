@@ -82,6 +82,8 @@ Shared notation:
 - `num_buckets = 2^log_num_buckets`
 - `block_num = 2^log_block_num`
 - `block_size = num_buckets / block_num`
+- `leaves_per_pred = 1` for point modes.
+- `leaves_per_pred = 2` for single-sided range in `vb-fss-range / bo-non-fss-range / bo-fss-range`.
 
 Shared aggregates:
 
@@ -106,23 +108,23 @@ Shared aggregates:
 3) `vb-fss-point` / `vb-fss-range`
 
 - `key_bytes = FIELD_BYTES * (log_num_buckets + 2)`
-- `c2s_tx = NUM_SERVERS * num_ands * (2 * key_bytes)`
+- `c2s_tx = NUM_SERVERS * num_ands * leaves_per_pred * (2 * key_bytes)`
 - `s2c_tx = NUM_SERVERS * FIELD_BYTES`
 - `per_server_s2s = FIELD_BYTES * window_size * (2 * num_ands - 1)`
 
 4) `bo-non-fss-point` / `bo-non-fss-range`
 
-- `c2s_tx = NUM_SERVERS * num_ands * (2 * (block_num + block_size) * FIELD_BYTES)`
+- `c2s_tx = NUM_SERVERS * num_ands * leaves_per_pred * (2 * (block_num + block_size) * FIELD_BYTES)`
 - `s2c_tx = NUM_SERVERS * FIELD_BYTES`
-- `per_server_s2s = FIELD_BYTES * window_size * (4 * num_ands - 1)`
+- `per_server_s2s = FIELD_BYTES * window_size * (4 * num_ands * leaves_per_pred - 1)`
 
 5) `bo-fss-point` / `bo-fss-range`
 
 - `key_block_bytes = FIELD_BYTES * (log_block_num + 2)`
 - `key_offset_bytes = FIELD_BYTES * ((log_num_buckets - log_block_num) + 2)`
-- `c2s_tx = NUM_SERVERS * num_ands * (2 * (key_block_bytes + key_offset_bytes))`
+- `c2s_tx = NUM_SERVERS * num_ands * leaves_per_pred * (2 * (key_block_bytes + key_offset_bytes))`
 - `s2c_tx = NUM_SERVERS * FIELD_BYTES`
-- `per_server_s2s = FIELD_BYTES * window_size * (4 * num_ands - 1)`
+- `per_server_s2s = FIELD_BYTES * window_size * (4 * num_ands * leaves_per_pred - 1)`
 
 ## Run Examples
 
