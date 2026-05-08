@@ -1,8 +1,5 @@
 # Client-Light Functional Secure Secret Shared Retrieval for Privacy-Preserving Cloud Database Analytics
 
-This repository is a derivative implementation based on the Waldo research prototype
-("Client-Light Functional Secure Secret Shared Retrieval for Privacy-Preserving Cloud Database Analytics").
-
 **Warning**: this is an academic prototype and is not production-ready.
 
 ## What Is In This Repo
