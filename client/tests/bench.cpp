@@ -1,4 +1,3 @@
-// Modified by Waldo derivative maintainers on 2026-04-23.
 #include <string>
 #include <vector>
 #include <fstream>

@@ -5,22 +5,6 @@ This repository is a derivative implementation based on the Waldo research proto
 
 **Warning**: this is an academic prototype and is not production-ready.
 
-## Upstream and Derivative Notice
-
-This repository contains local modifications on top of the upstream Waldo codebase.
-
-- Project: Client-Light Functional Secure Secret Shared Retrieval for Privacy-Preserving Cloud Database Analytics
-- Upstream project: Waldo: A Private Time-Series Database from Function Secret Sharing
-- Current paper title: Client-Light Functional Secure Secret Shared Retrieval for Privacy-Preserving Cloud Database Analytics
-- Paper authors: Emma Dauterman, Mayank Rathee, Raluca Ada Popa, Ion Stoica
-- Upstream license: Apache License 2.0
-
-When distributing source or binaries, include:
-
-- `LICENSE`
-- `NOTICE`
-- `THIRD_PARTY_LICENSES.md`
-
 ## What Is In This Repo
 
 - 3-server private query execution (`query_server`, `bench`, `correctness_tests`)

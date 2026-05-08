@@ -1,4 +1,3 @@
-// Modified by Waldo derivative maintainers on 2026-04-23.
 #ifndef CLIENT_H
 #define CLIENT_H
 
